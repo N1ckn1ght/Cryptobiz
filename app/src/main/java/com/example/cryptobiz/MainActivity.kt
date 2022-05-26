@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import com.example.cryptobiz.Converters.currencyDoubleToInt
 import com.example.cryptobiz.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -20,13 +22,12 @@ import okio.IOException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var data: QuotesJSON
+    private lateinit var db: AppDatabase
     private lateinit var buttonRefresh: Button
     private lateinit var buttonSave: Button
     private val client = OkHttpClient()
     private val currency = "ETH"
-
-    private lateinit var recyclerViewTable: RecyclerView
-    private lateinit var tableAdapter: TableAdapter
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,11 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.loading)
         )
 
+        val recyclerViewTable = findViewById<RecyclerView>(R.id.table)
+        val tableAdapter = TableAdapter(LayoutInflater.from(this))
+        recyclerViewTable.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        db = Room.databaseBuilder(this, AppDatabase::class.java, "quotations.db").build()
         buttonRefresh = findViewById(R.id.refresh)
         buttonSave = findViewById(R.id.save)
 
@@ -57,16 +63,22 @@ class MainActivity : AppCompatActivity() {
         buttonSave.setOnClickListener {
             Log.d("d/situation", "save action performed")
             it.isEnabled = false
-            // TODO: save quotation to a database
+            GlobalScope.launch(Dispatchers.IO) {
+                db.quotationsDao().insert(
+                    currencyDoubleToInt(data.RUB),
+                    currencyDoubleToInt(data.USD),
+                    currencyDoubleToInt(data.EUR),
+                    currencyDoubleToInt(data.BTC, 5)
+                )
+            }
         }
 
-        recyclerViewTable = findViewById(R.id.table)
-        tableAdapter = TableAdapter(LayoutInflater.from(this))
-        tableAdapter.submitList(mutableListOf())
-        recyclerViewTable.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerViewTable.adapter = tableAdapter
-
         buttonRefresh.performClick()
+
+        db.quotationsDao().getAll().observe(this) { quotations ->
+            tableAdapter.submitList(quotations)
+            recyclerViewTable.adapter = tableAdapter
+        }
     }
 
     private fun getData() {
@@ -97,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
                 response.body?.let {
-                    val data: QuoteJSON = Gson().fromJson(it.string(), QuoteJSON::class.java)
+                    data = Gson().fromJson(it.string(), QuotesJSON::class.java)
                     binding.quote = Quotation(
                         currency,
                         data.RUB.toString(),
@@ -105,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                         data.EUR.toString(),
                         data.BTC.toString()
                     )
-                    runOnUiThread{
+                    runOnUiThread {
                         buttonSave.isEnabled = true
                         Log.d("d/situation", "save is enabled")
                     }

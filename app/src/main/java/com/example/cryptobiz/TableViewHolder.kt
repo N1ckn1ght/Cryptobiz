@@ -9,9 +9,9 @@ class TableViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val textViewQuote = itemView.findViewById<TextView>(R.id.quote)
     private val textViewDelta = itemView.findViewById<TextView>(R.id.delta)
 
-    fun bindTo(record: Array<String>) {
-        textViewDatetime.text = record[0]
-        textViewQuote.text = record[1]
-        textViewDelta.text = record[2]
+    fun bindTo(datetime: String, quote: String, delta: String) {
+        textViewDatetime.text = datetime
+        textViewQuote.text = quote
+        textViewDelta.text = delta
     }
 }
