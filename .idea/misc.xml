@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Nick/AndroidStudioProjects/Cryptobiz/app/src/main/res/layout/activity_main.xml" value="0.1778115501519757" />
+        <entry key="..\:/Users/Nick/AndroidStudioProjects/Cryptobiz/app/src/main/res/layout/row.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/Professional/AndroidStudioProjects/Cryptobiz/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/Professional/AndroidStudioProjects/Cryptobiz/app/src/main/res/layout/quote.xml" value="0.17074275362318841" />
+        <entry key="..\:/Users/Professional/AndroidStudioProjects/Cryptobiz/app/src/main/res/layout/row.xml" value="0.1671195652173913" />
       </map>
     </option>
   </component>

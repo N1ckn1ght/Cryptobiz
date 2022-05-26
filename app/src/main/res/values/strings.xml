@@ -1,5 +1,5 @@
 <resources>
-    <string name="api_key">INSERT YOUR API KEY HERE</string>
+    <string name="api_key">b27daa48e432ac6f86b088b63763610deb3d4324bc92a6f1ae70bcaa24d8f61a</string>
 
     <string name="app_name">Cryptobiz</string>
     <string name="currency_key">Your currency:</string>

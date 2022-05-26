@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
 
     <data>
+
         <variable
             name="quote"
             type="com.example.cryptobiz.Quotation" />
@@ -16,8 +16,8 @@
         android:layout_height="match_parent"
         android:layout_marginStart="30dp"
         android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp"
         android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
         android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,91 +26,91 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/control_layout">
-                <TextView
-                    android:id="@+id/currency_key"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/currency_key"
-                    android:textSize="24sp"
-                    app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toTopOf="@+id/control_layout"
+            app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/currency_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@{quote.name}"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@+id/currency_key" />
+            <TextView
+                android:id="@+id/currency_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/currency_key"
+                android:textSize="24sp"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/rub"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:text="@{@string/rub(quote.RUB)}"
-                    android:textSize="24sp"
-                    app:layout_constraintTop_toBottomOf="@+id/currency_value" />
+            <TextView
+                android:id="@+id/currency_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@{quote.name}"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@+id/currency_key" />
 
-                <TextView
-                    android:id="@+id/usd"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{@string/usd(quote.USD)}"
-                    android:textSize="24sp"
-                    app:layout_constraintTop_toBottomOf="@+id/rub" />
+            <TextView
+                android:id="@+id/rub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@{@string/rub(quote.RUB)}"
+                android:textSize="24sp"
+                app:layout_constraintTop_toBottomOf="@+id/currency_value" />
 
-                <TextView
-                    android:id="@+id/eur"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{@string/eur(quote.EUR)}"
-                    android:textSize="24sp"
-                    app:layout_constraintTop_toBottomOf="@+id/usd" />
+            <TextView
+                android:id="@+id/usd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{@string/usd(quote.USD)}"
+                android:textSize="24sp"
+                app:layout_constraintTop_toBottomOf="@+id/rub" />
 
-                <TextView
-                    android:id="@+id/btc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{@string/btc(quote.BTC)}"
-                    android:textSize="24sp"
-                    app:layout_constraintTop_toBottomOf="@+id/eur" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/eur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{@string/eur(quote.EUR)}"
+                android:textSize="24sp"
+                app:layout_constraintTop_toBottomOf="@+id/usd" />
+
+            <TextView
+                android:id="@+id/btc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{@string/btc(quote.BTC)}"
+                android:textSize="24sp"
+                app:layout_constraintTop_toBottomOf="@+id/eur" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/control_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <Button
                 android:id="@+id/refresh"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:enabled="false"
                 android:text="@string/refresh"
                 android:textSize="18sp"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/save"
-                app:layout_constraintWidth_percent="0.45" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48" />
 
             <Button
                 android:id="@+id/save"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:enabled="false"
                 android:text="@string/save"
                 android:textSize="18sp"
-                android:enabled="false"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/refresh"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.45" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.48" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
