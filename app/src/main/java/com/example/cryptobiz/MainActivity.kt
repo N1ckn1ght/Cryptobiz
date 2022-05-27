@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import androidx.work.*
 import com.example.cryptobiz.Converters.currencyDoubleToInt
 import com.example.cryptobiz.databinding.ActivityMainBinding
 import com.google.gson.Gson
@@ -19,6 +20,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okio.IOException
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -27,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonRefresh: Button
     private lateinit var buttonSave: Button
     private val client = OkHttpClient()
-    private val currency = "ETH"
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.quote = Quotation(
-            currency,
+            getString(R.string.currency),
             getString(R.string.loading),
             getString(R.string.loading),
             getString(R.string.loading),
@@ -64,12 +65,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("d/situation", "save action performed")
             it.isEnabled = false
             GlobalScope.launch(Dispatchers.IO) {
-                db.quotationsDao().insert(
-                    currencyDoubleToInt(data.RUB),
-                    currencyDoubleToInt(data.USD),
-                    currencyDoubleToInt(data.EUR),
-                    currencyDoubleToInt(data.BTC, 5)
-                )
+                quotationInsert(data.RUB, data.USD, data.EUR, data.BTC)
             }
         }
 
@@ -79,12 +75,43 @@ class MainActivity : AppCompatActivity() {
             tableAdapter.submitList(quotations)
             recyclerViewTable.adapter = tableAdapter
         }
+
+        val constr = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val autoSaveProc = PeriodicWorkRequestBuilder<Autosave>(1, TimeUnit.HOURS)
+            .setConstraints(constr)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
+            .build()
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork("Autosave", ExistingPeriodicWorkPolicy.KEEP, autoSaveProc)
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(autoSaveProc.id)
+            .observe(this) {
+                val data = it.outputData
+                GlobalScope.launch(Dispatchers.IO) {
+                    quotationInsert(
+                        data.getDouble("RUB", 0.0),
+                        data.getDouble("USD", 0.0),
+                        data.getDouble("EUR", 0.0),
+                        data.getDouble("BTC", 0.0)
+                    )
+                }
+            }
+    }
+
+    private fun quotationInsert(rub: Double, usd: Double, eur: Double, btc: Double) {
+        db.quotationsDao().insert(
+            currencyDoubleToInt(rub),
+            currencyDoubleToInt(usd),
+            currencyDoubleToInt(eur),
+            currencyDoubleToInt(btc, 5)
+        )
     }
 
     private fun getData() {
         val request = Request.Builder()
             .url(
-                "https://min-api.cryptocompare.com/data/price?fsym=${currency}&tsyms=RUB,USD,EUR,BTC&extraParams=${
+                "https://min-api.cryptocompare.com/data/price?fsym=${getString(R.string.currency)}&tsyms=RUB,USD,EUR,BTC&extraParams=${
                     getString(
                         R.string.app_name
                     )
@@ -111,7 +138,7 @@ class MainActivity : AppCompatActivity() {
                 response.body?.let {
                     data = Gson().fromJson(it.string(), QuotesJSON::class.java)
                     binding.quote = Quotation(
-                        currency,
+                        getString(R.string.currency),
                         data.RUB.toString(),
                         data.USD.toString(),
                         data.EUR.toString(),
