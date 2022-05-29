@@ -1,5 +1,6 @@
 package com.example.cryptobiz
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,9 +10,8 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import androidx.work.*
-import com.example.cryptobiz.Converters.currencyDoubleToInt
+import com.example.cryptobiz.AppDatabase.Companion.instance
+import com.example.cryptobiz.Operations.quotationInsert
 import com.example.cryptobiz.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -20,14 +20,15 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okio.IOException
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var data: QuotesJSON
-    private lateinit var db: AppDatabase
     private lateinit var buttonRefresh: Button
     private lateinit var buttonSave: Button
+    private lateinit var data: QuotesJSON
+    private lateinit var db: AppDatabase
+    private lateinit var recyclerViewTable: RecyclerView
+    private lateinit var tableAdapter: TableAdapter
     private val client = OkHttpClient()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -45,13 +46,14 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.loading)
         )
 
-        val recyclerViewTable = findViewById<RecyclerView>(R.id.table)
-        val tableAdapter = TableAdapter(LayoutInflater.from(this))
+        recyclerViewTable = findViewById(R.id.table)
+        tableAdapter = TableAdapter(LayoutInflater.from(this))
         recyclerViewTable.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        db = Room.databaseBuilder(this, AppDatabase::class.java, "quotations.db").build()
         buttonRefresh = findViewById(R.id.refresh)
         buttonSave = findViewById(R.id.save)
+
+        db = instance(this)
 
         buttonRefresh.setOnClickListener {
             Log.d("d/situation", "refresh action performed")
@@ -65,7 +67,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("d/situation", "save action performed")
             it.isEnabled = false
             GlobalScope.launch(Dispatchers.IO) {
-                quotationInsert(data.RUB, data.USD, data.EUR, data.BTC)
+                quotationInsert(db, data.RUB, data.USD, data.EUR, data.BTC)
             }
         }
 
@@ -76,36 +78,7 @@ class MainActivity : AppCompatActivity() {
             recyclerViewTable.adapter = tableAdapter
         }
 
-        val constr = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        val autoSaveProc = PeriodicWorkRequestBuilder<Autosave>(1, TimeUnit.HOURS)
-            .setConstraints(constr)
-            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.SECONDS)
-            .build()
-        WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork("Autosave", ExistingPeriodicWorkPolicy.KEEP, autoSaveProc)
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(autoSaveProc.id)
-            .observe(this) {
-                val data = it.outputData
-                GlobalScope.launch(Dispatchers.IO) {
-                    quotationInsert(
-                        data.getDouble("RUB", 0.0),
-                        data.getDouble("USD", 0.0),
-                        data.getDouble("EUR", 0.0),
-                        data.getDouble("BTC", 0.0)
-                    )
-                }
-            }
-    }
-
-    private fun quotationInsert(rub: Double, usd: Double, eur: Double, btc: Double) {
-        db.quotationsDao().insert(
-            currencyDoubleToInt(rub),
-            currencyDoubleToInt(usd),
-            currencyDoubleToInt(eur),
-            currencyDoubleToInt(btc, 5)
-        )
+        this.startService(Intent(this, Autosave::class.java))
     }
 
     private fun getData() {
