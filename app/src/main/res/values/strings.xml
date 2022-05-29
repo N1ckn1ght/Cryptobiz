@@ -12,4 +12,7 @@
     <string name="save">Save now</string>
     <string name="loading">loading...</string>
     <string name="no_connection">Can\'t connect to the server!</string>
+
+    <string name="notification_title">Cryptobiz</string>
+    <string name="notification_message">Active and running</string>
 </resources>

@@ -58,13 +58,13 @@ class TableAdapter(private val inflater: LayoutInflater) :
             var delta =
                 getItem(position).quoteRUB.toDouble() / getItem(position + 1).quoteRUB.toDouble() - 1
             var sign = "+"
-            if (delta < 1) {
+            if (delta < 0) {
                 delta = -delta
                 sign = "-"
             }
-            val deltaConverted = (delta * 10000).toInt()
-            if (deltaConverted > 1) {
-                deltaShow = "$sign${currencyIntToString(deltaConverted)}%"
+            val deltaConverted = (delta * 1000000).toInt()
+            if (deltaConverted > 0) {
+                deltaShow = "$sign${currencyIntToString(deltaConverted, 4)}%"
             }
         }
         return deltaShow

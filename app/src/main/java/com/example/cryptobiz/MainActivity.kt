@@ -1,5 +1,6 @@
 package com.example.cryptobiz
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -76,6 +77,8 @@ class MainActivity : AppCompatActivity() {
             tableAdapter.submitList(quotations)
             recyclerViewTable.adapter = tableAdapter
         }
+
+        this.startService(Intent(this, Autosave::class.java))
     }
 
     private fun getData() {
