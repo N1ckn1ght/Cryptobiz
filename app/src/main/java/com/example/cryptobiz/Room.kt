@@ -1,5 +1,6 @@
 package com.example.cryptobiz
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.*
 
@@ -26,4 +27,15 @@ interface QuotationsDao {
 @Database(entities = [QuotationEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun quotationsDao(): QuotationsDao
+
+    companion object {
+        private var INSTANCE: AppDatabase? = null
+
+        internal fun instance(context: Context): AppDatabase {
+            if (INSTANCE == null) {
+                INSTANCE = Room.databaseBuilder(context, AppDatabase::class.java, "quotations.db").build()
+            }
+            return INSTANCE!!
+        }
+    }
 }
